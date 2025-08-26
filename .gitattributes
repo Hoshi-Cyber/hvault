@@ -1,0 +1,17 @@
+cat > .gitattributes << 'EOF'
+# default to LF for text
+*           text=auto eol=lf
+
+# keep Windows scripts CRLF
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# binary files untouched
+*.png       binary
+*.jpg       binary
+*.webp      binary
+*.gif       binary
+*.ico       binary
+*.woff      binary
+*.woff2     binary
+EOF
