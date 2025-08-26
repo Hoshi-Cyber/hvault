@@ -1,0 +1,113 @@
+/*
+  Global stylesheet defining design tokens and base styles.
+  We lean on CSS custom properties to expose a consistent design system
+  across components. Colors, typography, spacing and radii are defined here
+  in line with the Hoshi Vault Design System & Frontend Master Pack.
+*/
+
+/* CSS Reset and box sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Design Tokens */
+:root {
+  /* Colours */
+  --color-text-primary: #111111;
+  --color-accent-primary: #0044FF;
+  --color-accent-secondary: #FF6600;
+  --color-background: #FFFFFF;
+  --color-neutral: #F4F4F4;
+  --color-border: #DDDDDD;
+  /* Typography sizes */
+  --font-size-h1: 32px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-body: 16px;
+  --font-size-small: 14px;
+  /* Spacing */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+  /* Radius */
+  --radius: 8px;
+  /* Shadows */
+  --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+p {
+  font-size: var(--font-size-body);
+  margin-bottom: var(--space-2);
+}
+
+a {
+  color: var(--color-accent-primary);
+  text-decoration: underline;
+}
+
+a:hover,
+a:focus {
+  color: var(--color-accent-secondary);
+}
+
+button {
+  font-size: var(--font-size-body);
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+}
+
+/* Utility classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-3);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

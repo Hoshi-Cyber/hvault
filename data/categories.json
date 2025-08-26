@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "finance",
+    "name": "Finance",
+    "pov": "High-value finance and fintech domain names.",
+    "featured_domains": []
+  },
+  {
+    "slug": "health",
+    "name": "Health",
+    "pov": "Health and wellness domains for medical startups and services.",
+    "featured_domains": []
+  },
+  {
+    "slug": "ai",
+    "name": "Artificial Intelligence",
+    "pov": "AI and machine learning domains for next-gen ventures.",
+    "featured_domains": []
+  },
+  {
+    "slug": "geo",
+    "name": "Geo & Category",
+    "pov": "Domains tied to specific geographies or vertical categories.",
+    "featured_domains": []
+  },
+  {
+    "slug": "short",
+    "name": "Short",
+    "pov": "Ultra-short premium domains that pack a punch.",
+    "featured_domains": []
+  }
+]

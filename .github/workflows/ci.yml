@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Run Lighthouse CI
+        run: npx --yes lighthouse-ci ./ --collect.url=http://localhost:3000 --collect.startServerCommand="npm run start" --collect.numberOfRuns=1
+      - name: Accessibility check
+        run: npx --yes axe-crawler http://localhost:3000
