@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 /**
  * Responsive header with mobile hamburger.
  * <768px: hamburger opens full-screen menu. Body scroll locks while open.
+ * Sticky header via .site-header class (see globals.css).
  */
 export default function Header() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function Header() {
   }, [router.events]);
 
   return (
-    <header>
+    <header className="site-header">
       <nav aria-label="Main navigation" className="nav">
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" legacyBehavior>
