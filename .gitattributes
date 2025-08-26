@@ -1,4 +1,3 @@
-cat > .gitattributes << 'EOF'
 # default to LF for text
 *           text=auto eol=lf
 
@@ -14,4 +13,4 @@ cat > .gitattributes << 'EOF'
 *.ico       binary
 *.woff      binary
 *.woff2     binary
-EOF
+
