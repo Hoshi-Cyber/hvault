@@ -3,16 +3,17 @@ import { useDrawer } from '../context/DrawerContext';
 
 /**
  * InquiryDrawer
- * - True overlay with backdrop
- * - Full-height and max width = viewport on mobile
- * - Body scroll locks while open
+ * - Full-viewport drawer (100dvh), width min(420px, 100vw)
+ * - Backdrop + body scroll lock
+ * - Header stays visible; submit bar is sticky at bottom
+ * - Form content scrolls inside, never overflows the page
  */
 export default function InquiryDrawer() {
   const { isOpen, domain, close } = useDrawer();
   const [form, setForm] = useState({ name: '', email: '', message: '', nda: false });
   const [errors, setErrors] = useState({});
 
-  // lock body scroll when open
+  // Lock body scroll while open
   useEffect(() => {
     document.body.classList.toggle('no-scroll', isOpen);
     return () => document.body.classList.remove('no-scroll');
@@ -43,6 +44,7 @@ export default function InquiryDrawer() {
       {/* Backdrop */}
       <div
         onClick={close}
+        aria-hidden={!isOpen}
         style={{
           position: 'fixed',
           inset: 0,
@@ -52,7 +54,6 @@ export default function InquiryDrawer() {
           transition: 'opacity .2s ease',
           zIndex: 1001
         }}
-        aria-hidden={!isOpen}
       />
 
       {/* Drawer */}
@@ -65,7 +66,7 @@ export default function InquiryDrawer() {
           position: 'fixed',
           top: 0,
           right: 0,
-          height: '100vh',
+          height: '100dvh',
           width: 'min(420px, 100vw)',
           background: 'var(--color-background)',
           boxShadow: '-2px 0 16px rgba(0,0,0,0.1)',
@@ -73,22 +74,54 @@ export default function InquiryDrawer() {
           transition: 'transform .25s ease',
           zIndex: 1002,
           display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto'
+          flexDirection: 'column'
         }}
       >
-        <div style={{ padding: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ marginRight: 'var(--space-2)' }}>Inquire About {domain?.name}</h2>
+        {/* Fixed header (close button never cut) */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: '1px solid var(--color-border)',
+            minHeight: 48
+          }}
+        >
+          <h2 style={{ fontSize: 18, marginRight: 8, lineHeight: 1.2 }}>
+            Inquire About {domain?.name}
+          </h2>
           <button
             onClick={close}
             aria-label="Close inquiry drawer"
-            style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', width: 32, height: 32, lineHeight: '30px', textAlign: 'center' }}
+            style={{
+              background: '#fff',
+              border: '1px solid var(--color-border)',
+              borderRadius: '6px',
+              width: 32,
+              height: 32,
+              lineHeight: '30px',
+              textAlign: 'center',
+              fontSize: 18
+            }}
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '0 var(--space-4) var(--space-4)', display: 'flex', flexDirection: 'column', gap: '12px' }} noValidate>
+        {/* Scrollable form content */}
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            padding: '16px',
+            overflowY: 'auto',
+            flex: 1
+          }}
+        >
           <label htmlFor="name">Name</label>
           <input
             id="name"
@@ -96,7 +129,7 @@ export default function InquiryDrawer() {
             type="text"
             value={form.name}
             onChange={handleChange}
-            style={{ padding: 'var(--space-1)', border: `1px solid var(--color-border)`, borderRadius: 'var(--radius)' }}
+            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
             aria-invalid={errors.name ? 'true' : 'false'}
             aria-describedby={errors.name ? 'name-error' : undefined}
             required
@@ -110,7 +143,7 @@ export default function InquiryDrawer() {
             type="email"
             value={form.email}
             onChange={handleChange}
-            style={{ padding: 'var(--space-1)', border: `1px solid var(--color-border)`, borderRadius: 'var(--radius)' }}
+            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
             aria-invalid={errors.email ? 'true' : 'false'}
             aria-describedby={errors.email ? 'email-error' : undefined}
             required
@@ -124,21 +157,44 @@ export default function InquiryDrawer() {
             value={form.message}
             onChange={handleChange}
             rows={6}
-            style={{ padding: 'var(--space-1)', border: `1px solid var(--color-border)`, borderRadius: 'var(--radius)', resize: 'vertical' }}
+            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', resize: 'vertical' }}
             aria-invalid={errors.message ? 'true' : 'false'}
             aria-describedby={errors.message ? 'message-error' : undefined}
             required
           />
           {errors.message && <span id="message-error" style={{ color: 'red' }}>{errors.message}</span>}
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input type="checkbox" name="nda" checked={form.nda} onChange={handleChange} />
             <span>I agree to the NDA</span>
           </label>
 
-          <button type="submit" style={{ background: 'var(--color-accent-primary)', color: '#fff', padding: 'var(--space-2)', borderRadius: 'var(--radius)', border: 'none', marginTop: 'var(--space-2)' }}>
-            Submit Inquiry
-          </button>
+          {/* Sticky submit bar */}
+          <div
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              background: '#fff',
+              paddingTop: 8,
+              paddingBottom: 8,
+              borderTop: '1px solid var(--color-border)'
+            }}
+          >
+            <button
+              type="submit"
+              style={{
+                width: '100%',
+                background: 'var(--color-accent-primary)',
+                color: '#fff',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius)',
+                border: 'none',
+                fontWeight: 600
+              }}
+            >
+              Submit Inquiry
+            </button>
+          </div>
         </form>
       </aside>
     </>
