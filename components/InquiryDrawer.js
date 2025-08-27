@@ -2,18 +2,16 @@ import { useEffect, useState } from 'react';
 import { useDrawer } from '../context/DrawerContext';
 
 /**
- * InquiryDrawer
- * - Full-viewport drawer (100dvh), width min(420px, 100vw)
- * - Backdrop + body scroll lock
- * - Header stays visible; submit bar is sticky at bottom
- * - Form content scrolls inside, never overflows the page
+ * InquiryDrawer with subtle animations:
+ * - Drawer slides in from right
+ * - Content fades + slides up slightly
+ * - Respects prefers-reduced-motion
  */
 export default function InquiryDrawer() {
   const { isOpen, domain, close } = useDrawer();
   const [form, setForm] = useState({ name: '', email: '', message: '', nda: false });
   const [errors, setErrors] = useState({});
 
-  // Lock body scroll while open
   useEffect(() => {
     document.body.classList.toggle('no-scroll', isOpen);
     return () => document.body.classList.remove('no-scroll');
@@ -39,6 +37,15 @@ export default function InquiryDrawer() {
     }
   };
 
+  // reduced motion
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const drawerTransition = prefersReduced ? 'none' : 'transform .28s cubic-bezier(.2,.8,.2,1)';
+  const fadeUpTransition = prefersReduced ? 'none' : 'opacity .28s ease, transform .28s ease';
+
   return (
     <>
       {/* Backdrop */}
@@ -51,7 +58,7 @@ export default function InquiryDrawer() {
           background: 'rgba(0,0,0,.4)',
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
-          transition: 'opacity .2s ease',
+          transition: prefersReduced ? 'none' : 'opacity .2s ease',
           zIndex: 1001
         }}
       />
@@ -71,13 +78,13 @@ export default function InquiryDrawer() {
           background: 'var(--color-background)',
           boxShadow: '-2px 0 16px rgba(0,0,0,0.1)',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform .25s ease',
+          transition: drawerTransition,
           zIndex: 1002,
           display: 'flex',
           flexDirection: 'column'
         }}
       >
-        {/* Fixed header (close button never cut) */}
+        {/* Header */}
         <div
           style={{
             display: 'flex',
@@ -109,93 +116,105 @@ export default function InquiryDrawer() {
           </button>
         </div>
 
-        {/* Scrollable form content */}
-        <form
-          onSubmit={handleSubmit}
-          noValidate
+        {/* Animated content wrapper */}
+        <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 12,
-            padding: '16px',
-            overflowY: 'auto',
-            flex: 1
+            flex: 1,
+            opacity: isOpen ? 1 : 0,
+            transform: isOpen ? 'translateY(0)' : 'translateY(8px)',
+            transition: fadeUpTransition
           }}
         >
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            value={form.name}
-            onChange={handleChange}
-            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
-            aria-invalid={errors.name ? 'true' : 'false'}
-            aria-describedby={errors.name ? 'name-error' : undefined}
-            required
-          />
-          {errors.name && <span id="name-error" style={{ color: 'red' }}>{errors.name}</span>}
-
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
-            aria-invalid={errors.email ? 'true' : 'false'}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            required
-          />
-          {errors.email && <span id="email-error" style={{ color: 'red' }}>{errors.email}</span>}
-
-          <label htmlFor="message">Message</label>
-          <textarea
-            id="message"
-            name="message"
-            value={form.message}
-            onChange={handleChange}
-            rows={6}
-            style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', resize: 'vertical' }}
-            aria-invalid={errors.message ? 'true' : 'false'}
-            aria-describedby={errors.message ? 'message-error' : undefined}
-            required
-          />
-          {errors.message && <span id="message-error" style={{ color: 'red' }}>{errors.message}</span>}
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input type="checkbox" name="nda" checked={form.nda} onChange={handleChange} />
-            <span>I agree to the NDA</span>
-          </label>
-
-          {/* Sticky submit bar */}
-          <div
+          {/* Scrollable form content */}
+          <form
+            onSubmit={handleSubmit}
+            noValidate
             style={{
-              position: 'sticky',
-              bottom: 0,
-              background: '#fff',
-              paddingTop: 8,
-              paddingBottom: 8,
-              borderTop: '1px solid var(--color-border)'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              padding: '16px',
+              overflowY: 'auto',
+              flex: 1
             }}
           >
-            <button
-              type="submit"
+            <label htmlFor="name">Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value={form.name}
+              onChange={handleChange}
+              style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
+              aria-invalid={errors.name ? 'true' : 'false'}
+              aria-describedby={errors.name ? 'name-error' : undefined}
+              required
+            />
+            {errors.name && <span id="name-error" style={{ color: 'red' }}>{errors.name}</span>}
+
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)' }}
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              required
+            />
+            {errors.email && <span id="email-error" style={{ color: 'red' }}>{errors.email}</span>}
+
+            <label htmlFor="message">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              value={form.message}
+              onChange={handleChange}
+              rows={6}
+              style={{ padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', resize: 'vertical' }}
+              aria-invalid={errors.message ? 'true' : 'false'}
+              aria-describedby={errors.message ? 'message-error' : undefined}
+              required
+            />
+            {errors.message && <span id="message-error" style={{ color: 'red' }}>{errors.message}</span>}
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input type="checkbox" name="nda" checked={form.nda} onChange={handleChange} />
+              <span>I agree to the NDA</span>
+            </label>
+
+            {/* Sticky submit bar */}
+            <div
               style={{
-                width: '100%',
-                background: 'var(--color-accent-primary)',
-                color: '#fff',
-                padding: '12px 14px',
-                borderRadius: 'var(--radius)',
-                border: 'none',
-                fontWeight: 600
+                position: 'sticky',
+                bottom: 0,
+                background: '#fff',
+                paddingTop: 8,
+                paddingBottom: 8,
+                borderTop: '1px solid var(--color-border)'
               }}
             >
-              Submit Inquiry
-            </button>
-          </div>
-        </form>
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  background: 'var(--color-accent-primary)',
+                  color: '#fff',
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius)',
+                  border: 'none',
+                  fontWeight: 600
+                }}
+              >
+                Submit Inquiry
+              </button>
+            </div>
+          </form>
+        </div>
       </aside>
     </>
   );
