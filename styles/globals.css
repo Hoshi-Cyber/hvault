@@ -257,6 +257,23 @@ textarea {
 }
 label { display: inline-block; }
 
+/* ======================== */
+/* Mobile-only helpers      */
+/* ======================== */
+
+/* Generic helpers */
+.show-mobile { display: none !important; }
+.hide-mobile { display: block !important; }
+
+/* Specific alias for the portfolio toolbar */
+.portfolio-toolbar { display: none; }
+
+@media (max-width: 768px) {
+  .show-mobile { display: block !important; }
+  .hide-mobile { display: none !important; }
+  .portfolio-toolbar { display: block; }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .backdrop, .drawer,

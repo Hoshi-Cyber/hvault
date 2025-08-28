@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DomainCard from '../../components/DomainCard';
+import FilterDrawer from '../../components/FilterDrawer';
 import domainsData from '../../data/domains.json';
 import categoriesData from '../../data/categories.json';
 
@@ -135,14 +136,10 @@ export default function Portfolio() {
     return n;
   }, [filters]);
 
-  // --- mobile drawer ---
+  // --- mobile drawer trigger state (body lock handled inside FilterDrawer) ---
   const [drawerOpen, setDrawerOpen] = useState(false);
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.body.classList.toggle('no-scroll', drawerOpen);
-    }
-  }, [drawerOpen]);
 
+  // shared filters UI (rendered in desktop sidebar; same controls as drawer)
   const FiltersUI = (
     <>
       {/* TLD */}
@@ -382,111 +379,25 @@ export default function Portfolio() {
         </section>
       </div>
 
-      {/* MOBILE drawer + backdrop */}
+      {/* MOBILE Filter Drawer (external component) */}
       {isMobile && (
-        <>
-          <div
-            onClick={() => setDrawerOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,.4)',
-              opacity: drawerOpen ? 1 : 0,
-              pointerEvents: drawerOpen ? 'auto' : 'none',
-              transition: 'opacity .2s ease',
-              zIndex: 1001,
-            }}
-            aria-hidden={!drawerOpen}
-          />
-          <aside
-            role="dialog"
-            aria-modal="true"
-            aria-label="Filters"
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              height: '100vh',
-              width: 'min(440px, 100vw)',
-              background: '#fff',
-              transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)',
-              transition: 'transform .25s ease',
-              zIndex: 1002,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <div
-              style={{
-                position: 'sticky',
-                top: 0,
-                background: '#fff',
-                borderBottom: '1px solid var(--color-border)',
-                padding: '12px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <strong>Filters</strong>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {activeCount > 0 && (
-                  <button
-                    onClick={clearAll}
-                    style={{
-                      border: '1px solid var(--color-border)',
-                      background: '#fff',
-                      borderRadius: 8,
-                      padding: '6px 10px',
-                    }}
-                  >
-                    Clear
-                  </button>
-                )}
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  style={{
-                    border: '1px solid var(--color-border)',
-                    background: '#fff',
-                    borderRadius: 8,
-                    padding: '6px 10px',
-                  }}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-
-            <div style={{ padding: '16px', overflow: 'auto' }}>
-              {FiltersUI}
-            </div>
-
-            <div
-              style={{
-                position: 'sticky',
-                bottom: 0,
-                background: '#fff',
-                borderTop: '1px solid var(--color-border)',
-                padding: 12,
-              }}
-            >
-              <button
-                onClick={() => setDrawerOpen(false)}
-                style={{
-                  width: '100%',
-                  background: 'var(--color-accent-primary)',
-                  color: '#fff',
-                  padding: '12px 14px',
-                  borderRadius: 8,
-                  border: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Apply Filters
-              </button>
-            </div>
-          </aside>
-        </>
+        <FilterDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          tldOptions={tldOptions}
+          categoryOptions={categoryOptions}
+          statusOptions={statusOptions}
+          filters={filters}
+          toggleTld={toggleTld}
+          toggleCategory={toggleCategory}
+          handleStatusChange={handleStatusChange}
+          handleLengthChange={handleLengthChange}
+          handlePriceChange={handlePriceChange}
+          handleAgeChange={handleAgeChange}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          onReset={clearAll}
+        />
       )}
     </>
   );
