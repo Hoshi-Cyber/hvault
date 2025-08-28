@@ -36,12 +36,14 @@ body.no-scroll { overflow: hidden; }
   --color-background: #FFFFFF;
   --color-neutral: #F4F4F4;
   --color-border: #DDDDDD;
+
   /* Typography sizes */
   --font-size-h1: 32px;
   --font-size-h2: 24px;
   --font-size-h3: 20px;
   --font-size-body: 16px;
   --font-size-small: 14px;
+
   /* Spacing */
   --space-1: 8px;
   --space-2: 16px;
@@ -49,11 +51,16 @@ body.no-scroll { overflow: hidden; }
   --space-4: 32px;
   --space-5: 48px;
   --space-6: 64px;
+
   /* Radius */
   --radius: 8px;
+
   /* Shadows */
   --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  /* Layout */
+  --site-header-h: 56px; /* used by sticky elements and drawers */
 }
 
 h1 {
@@ -160,7 +167,7 @@ button {
   .nav-links.open {
     display: block;
     position: fixed;
-    top: 56px; /* nav height */
+    top: var(--site-header-h); /* nav height */
     left: 0; right: 0; bottom: 0;
     background: #fff;
     padding: var(--space-3);
@@ -181,4 +188,79 @@ button {
   z-index: 1100; /* above overlays */
   background: var(--color-background);
   box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  min-height: var(--site-header-h);
+  display: flex;
+  align-items: center;
+}
+
+/* ======================== */
+/* Generic grid + drawers   */
+/* ======================== */
+
+/* Card grid utility (optional) */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Drawer utilities (optional: for reuse across components) */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 1001;
+}
+.backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(440px, 100vw);
+  background: #fff;
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open {
+  transform: translateX(0);
+}
+
+/* Basic form control polish */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 10px;
+  font-size: 16px; /* avoids iOS zoom */
+  width: 100%;
+  background: #fff;
+}
+label { display: inline-block; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop, .drawer,
+  .nav-links.open {
+    transition: none !important;
+  }
 }
