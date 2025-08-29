@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useDrawer } from '../context/DrawerContext';
 
 /**
- * InquiryDrawer with subtle animations:
- * - Drawer slides in from right
- * - Content fades + slides up slightly
+ * InquiryDrawer
+ * - Domain summary (name, status pill, price/range) pinned under header
+ * - Esc to close + backdrop click
+ * - Sticky footer with Cancel + Submit
+ * - Hidden payload fields: slug, name, status, price_type, price_value
  * - Respects prefers-reduced-motion
  */
 export default function InquiryDrawer() {
@@ -12,10 +14,34 @@ export default function InquiryDrawer() {
   const [form, setForm] = useState({ name: '', email: '', message: '', nda: false });
   const [errors, setErrors] = useState({});
 
+  // derive price display and raw value for payload
+  const getPriceDisplay = () => {
+    if (!domain) return 'Price on Application';
+    if (domain.price_type === 'fixed') return `$${domain.price_value}`;
+    if (domain.price_type === 'range' && Array.isArray(domain.price_value)) {
+      const [lo, hi] = domain.price_value;
+      return `$${lo}–$${hi}`;
+    }
+    return 'Price on Application';
+  };
+  const priceDisplay = getPriceDisplay();
+  const priceRaw = domain?.price_value ?? null;
+
+  // lock body scroll when open
   useEffect(() => {
     document.body.classList.toggle('no-scroll', isOpen);
     return () => document.body.classList.remove('no-scroll');
   }, [isOpen]);
+
+  // close on ESC
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, close]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,7 +56,18 @@ export default function InquiryDrawer() {
     if (!form.message) errs.message = 'Please provide a message';
     setErrors(errs);
     if (Object.keys(errs).length === 0) {
-      console.log('Inquiry submitted', { ...form, domain });
+      // payload with domain context
+      const payload = {
+        ...form,
+        domain: {
+          slug: domain?.slug,
+          name: domain?.name,
+          status: domain?.status,
+          price_type: domain?.price_type,
+          price_value: domain?.price_value,
+        },
+      };
+      console.log('Inquiry submitted', payload);
       alert('Thank you for your inquiry!');
       close();
       setForm({ name: '', email: '', message: '', nda: false });
@@ -74,7 +111,7 @@ export default function InquiryDrawer() {
           top: 0,
           right: 0,
           height: '100dvh',
-          width: 'min(420px, 100vw)',
+          width: 'min(440px, 100vw)',
           background: 'var(--color-background)',
           boxShadow: '-2px 0 16px rgba(0,0,0,0.1)',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
@@ -96,7 +133,7 @@ export default function InquiryDrawer() {
           }}
         >
           <h2 style={{ fontSize: 18, marginRight: 8, lineHeight: 1.2 }}>
-            Inquire About {domain?.name}
+            Inquire About {domain?.name ?? 'this domain'}
           </h2>
           <button
             onClick={close}
@@ -115,6 +152,45 @@ export default function InquiryDrawer() {
             ×
           </button>
         </div>
+
+        {/* Domain summary */}
+        {domain && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: 8,
+              alignItems: 'center',
+              padding: '12px 16px',
+              borderBottom: '1px solid var(--color-border)'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600 }}>{domain.name}</div>
+              <div style={{ fontSize: 14, color: '#555' }}>
+                {domain.tld} · {domain.length} chars
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  padding: '2px 8px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  lineHeight: 1.6,
+                  background: '#f1f5ff',
+                  color: '#1b3cff',
+                  border: '1px solid var(--color-border)'
+                }}
+                aria-label={`status ${domain.status}`}
+              >
+                {domain.status}
+              </span>
+              <div style={{ fontSize: 14, marginTop: 6 }}>{priceDisplay}</div>
+            </div>
+          </div>
+        )}
 
         {/* Animated content wrapper */}
         <div
@@ -140,6 +216,19 @@ export default function InquiryDrawer() {
               flex: 1
             }}
           >
+            {/* Hidden payload fields */}
+            <input type="hidden" name="domain_slug" value={domain?.slug ?? ''} />
+            <input type="hidden" name="domain_name" value={domain?.name ?? ''} />
+            <input type="hidden" name="domain_status" value={domain?.status ?? ''} />
+            <input type="hidden" name="domain_price_type" value={domain?.price_type ?? ''} />
+            <input
+              type="hidden"
+              name="domain_price_value"
+              value={
+                Array.isArray(priceRaw) ? JSON.stringify(priceRaw) : (priceRaw ?? '')
+              }
+            />
+
             <label htmlFor="name">Name</label>
             <input
               id="name"
@@ -186,34 +275,56 @@ export default function InquiryDrawer() {
               <input type="checkbox" name="nda" checked={form.nda} onChange={handleChange} />
               <span>I agree to the NDA</span>
             </label>
+          </form>
 
-            {/* Sticky submit bar */}
-            <div
+          {/* Sticky action bar */}
+          <div
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              background: '#fff',
+              borderTop: '1px solid var(--color-border)',
+              padding: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 8
+            }}
+          >
+            <button
+              type="button"
+              onClick={close}
               style={{
-                position: 'sticky',
-                bottom: 0,
+                width: '100%',
                 background: '#fff',
-                paddingTop: 8,
-                paddingBottom: 8,
-                borderTop: '1px solid var(--color-border)'
+                color: 'var(--color-text-primary)',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius)',
+                border: '1px solid var(--color-border)',
+                fontWeight: 600
               }}
             >
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  background: 'var(--color-accent-primary)',
-                  color: '#fff',
-                  padding: '12px 14px',
-                  borderRadius: 'var(--radius)',
-                  border: 'none',
-                  fontWeight: 600
-                }}
-              >
-                Submit Inquiry
-              </button>
-            </div>
-          </form>
+              Cancel
+            </button>
+            <button
+              formAction="#"
+              onClick={(e) => {
+                // allow Enter on focused button to submit form
+                const formEl = e.currentTarget.closest('aside')?.querySelector('form');
+                if (formEl) formEl.requestSubmit();
+              }}
+              style={{
+                width: '100%',
+                background: 'var(--color-accent-primary)',
+                color: '#fff',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius)',
+                border: 'none',
+                fontWeight: 600
+              }}
+            >
+              Submit Inquiry
+            </button>
+          </div>
         </div>
       </aside>
     </>
