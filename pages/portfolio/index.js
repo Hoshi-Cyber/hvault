@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DomainCard from '../../components/DomainCard';
@@ -113,22 +113,40 @@ export default function Portfolio() {
     return arr;
   }, [filtered, sortBy]);
 
-  // --- handlers ---
-  const toggleTld = (tld) =>
+  // --- stable handlers ---
+  const toggleTld = useCallback((tld) => {
     setFilters((prev) => ({
       ...prev,
       tlds: prev.tlds.includes(tld) ? prev.tlds.filter((x) => x !== tld) : [...prev.tlds, tld],
     }));
-  const toggleCategory = (slug) =>
+  }, []);
+
+  const toggleCategory = useCallback((slug) => {
     setFilters((prev) => ({
       ...prev,
       categories: prev.categories.includes(slug) ? prev.categories.filter((x) => x !== slug) : [...prev.categories, slug],
     }));
-  const handleStatusChange = (status) => setFilters((prev) => ({ ...prev, status }));
-  const handleLengthChange = (from, to) => setFilters((prev) => ({ ...prev, length: [from, to] }));
-  const handlePriceChange  = (from, to) => setFilters((prev) => ({ ...prev, price: [from, to] }));
-  const handleAgeChange    = (from, to) => setFilters((prev) => ({ ...prev, age: [from, to] }));
-  const clearAll = () => setFilters({ tlds: [], categories: [], status: '', length: [null, null], price: [null, null], age: [null, null] });
+  }, []);
+
+  const handleStatusChange = useCallback((status) => {
+    setFilters((prev) => ({ ...prev, status }));
+  }, []);
+
+  const handleLengthChange = useCallback((from, to) => {
+    setFilters((prev) => ({ ...prev, length: [from, to] }));
+  }, []);
+
+  const handlePriceChange = useCallback((from, to) => {
+    setFilters((prev) => ({ ...prev, price: [from, to] }));
+  }, []);
+
+  const handleAgeChange = useCallback((from, to) => {
+    setFilters((prev) => ({ ...prev, age: [from, to] }));
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setFilters({ tlds: [], categories: [], status: '', length: [null, null], price: [null, null], age: [null, null] });
+  }, []);
 
   const activeCount = useMemo(() => {
     let n = 0;
@@ -142,12 +160,12 @@ export default function Portfolio() {
   }, [filters]);
 
   // --- chips (active filters) ---
-  const rangeLabel = (label, [a, b], suffix = '') => {
+  const rangeLabel = useCallback((label, [a, b], suffix = '') => {
     if (a != null && b != null) return `${label}: ${a}–${b}${suffix}`;
     if (a != null) return `${label}: ≥${a}${suffix}`;
     if (b != null) return `${label}: ≤${b}${suffix}`;
     return '';
-  };
+  }, []);
 
   const chips = useMemo(() => {
     const arr = [];
@@ -170,9 +188,9 @@ export default function Portfolio() {
       arr.push({ type: 'age', key: 'age', label: rangeLabel('Age', filters.age, 'y') });
     }
     return arr;
-  }, [filters, categoryNameBySlug]);
+  }, [filters, categoryNameBySlug, rangeLabel]);
 
-  const removeChip = (chip) => {
+  const removeChip = useCallback((chip) => {
     if (chip.type === 'tld') {
       toggleTld(chip.value);
     } else if (chip.type === 'cat') {
@@ -186,7 +204,7 @@ export default function Portfolio() {
     } else if (chip.type === 'age') {
       handleAgeChange(null, null);
     }
-  };
+  }, [toggleTld, toggleCategory, handleStatusChange, handleLengthChange, handlePriceChange, handleAgeChange]);
 
   // --- mobile drawer trigger state (body lock handled inside FilterDrawer) ---
   const [drawerOpen, setDrawerOpen] = useState(false);

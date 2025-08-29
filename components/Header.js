@@ -34,12 +34,19 @@ export default function Header() {
       <nav aria-label="Main navigation" className="nav">
         <div
           className="container"
-          style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            minHeight: 'var(--site-header-h)',
+          }}
         >
-          {/* Brand (left) */}
-          <Logo size={24} />
+          {/* Brand (always at left; link to home) */}
+          <Link href="/" aria-label="Hoshi Vault home" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Logo size={24} />
+          </Link>
 
-          {/* Spacer to push controls to the far right */}
+          {/* Spacer pushes nav to the right on desktop */}
           <div style={{ flex: 1 }} />
 
           {/* Desktop links (hidden on mobile via CSS) */}
@@ -51,6 +58,7 @@ export default function Header() {
                   <Link
                     href={href}
                     onClick={() => setOpen(false)}
+                    aria-current={isActive ? 'page' : undefined}
                     className={isActive ? 'active' : ''}
                     style={{
                       color: isActive
@@ -67,14 +75,18 @@ export default function Header() {
             })}
           </ul>
 
-          {/* Hamburger (far right on mobile) */}
+          {/* Hamburger (visible on mobile only; aligned far right) */}
           <button
             className="hamburger"
             aria-label="Toggle menu"
             aria-controls="primary-menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            style={{ marginLeft: 'auto' }}
+            /** ensure it sits flush right and has comfy hit area */
+            style={{
+              marginLeft: 'auto',
+              padding: '6px', // extra tap target
+            }}
           >
             <span></span>
             <span></span>

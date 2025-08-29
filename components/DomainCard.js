@@ -1,5 +1,5 @@
+import React, { useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { useCompare } from '../context/CompareContext';
 import { useDrawer } from '../context/DrawerContext';
 
@@ -10,50 +10,64 @@ import { useDrawer } from '../context/DrawerContext';
  * - Clear metadata row (TLD • length)
  * - Primary Inquire button opens drawer with domain context
  * - Mobile-friendly spacing & tap targets; visible focus outlines
- * - Memoized derived text to avoid rework
+ * - Memoized derived text/handlers to avoid rework
  */
 function DomainCard({ domain }) {
   const { selected, add, remove } = useCompare();
   const { open } = useDrawer();
-  const isSelected = !!selected.find((d) => d.slug === domain.slug);
 
-  const handleCompareChange = (e) => {
-    // avoid bubbling to any future card-level handlers
-    e.stopPropagation?.();
-    if (isSelected) remove(domain.slug);
-    else add(domain);
-  };
+  const isSelected = useMemo(
+    () => !!selected.find((d) => d.slug === domain.slug),
+    [selected, domain.slug]
+  );
 
-  const statusColours = {
-    buy: '#0044FF',
-    lease: '#FF6600',
-    'make-offer': '#888888',
-    'in-use': '#555555',
-  };
-
-  // Derive contextual price/label for the top-right of the card
+  // Derived price label (top-right)
   const priceText = useMemo(() => {
-    if (domain.price_type === 'fixed') {
-      return `Buy $${domain.price_value}`;
-    }
+    if (domain.price_type === 'fixed') return `Buy $${domain.price_value}`;
     if (domain.price_type === 'range' && Array.isArray(domain.price_value)) {
       const [low, high] = domain.price_value;
       return `$${low}–$${high}`;
     }
-    if (domain.price_type === 'POA') {
-      return 'POA';
-    }
-    // Fallback
+    if (domain.price_type === 'POA') return 'POA';
     return '';
   }, [domain.price_type, domain.price_value]);
 
-  // Optional “From $MIN” hint for make-offer
+  // Optional “From $MIN” hint for make-offer cards
   const minOfferHint = useMemo(() => {
     if (domain.status === 'make-offer' && typeof domain.min_offer === 'number') {
       return `From $${domain.min_offer}`;
     }
     return null;
   }, [domain.status, domain.min_offer]);
+
+  // Status pill class
+  const pillClass = useMemo(() => {
+    const map = {
+      buy: 'pill pill--buy',
+      lease: 'pill pill--lease',
+      'make-offer': 'pill pill--make-offer',
+      'in-use': 'pill pill--in-use',
+    };
+    return map[domain.status] || 'pill';
+  }, [domain.status]);
+
+  // Stable handlers
+  const handleCompareChange = useCallback(
+    (e) => {
+      e.stopPropagation?.();
+      if (isSelected) remove(domain.slug);
+      else add(domain);
+    },
+    [isSelected, remove, add, domain.slug]
+  );
+
+  const handleInquire = useCallback(
+    (e) => {
+      e.stopPropagation?.();
+      open(domain);
+    },
+    [open, domain]
+  );
 
   return (
     <div
@@ -90,25 +104,9 @@ function DomainCard({ domain }) {
     >
       {/* Top meta strip: status pill + price */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span
-          className="pill"
-          style={{
-            padding: '2px 8px',
-            borderRadius: 999,
-            fontSize: 12,
-            lineHeight: 1.4,
-            background: statusColours[domain.status] || '#999',
-            color: '#fff',
-            textTransform: 'capitalize',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            border: 'none',
-          }}
-          aria-label={`status ${domain.status}`}
-        >
+        <span className={pillClass} aria-label={`status ${domain.status}`}>
           {domain.status}
         </span>
-
         {priceText ? (
           <span style={{ fontSize: 12, color: '#111', whiteSpace: 'nowrap' }}>{priceText}</span>
         ) : (
@@ -120,8 +118,9 @@ function DomainCard({ domain }) {
       <h3 style={{ margin: 0, wordBreak: 'break-word', fontSize: '18px', lineHeight: 1.25 }}>
         <Link
           href={`/domain/${domain.slug}`}
-          style={{ textDecoration: 'none', color: 'var(--color-text-primary)' }}
+          className="card-title"
           aria-label={`View details for ${domain.name}`}
+          style={{ textDecoration: 'none', color: 'var(--color-text-primary)' }}
         >
           {domain.name}
         </Link>
@@ -143,11 +142,7 @@ function DomainCard({ domain }) {
       </p>
 
       {/* Optional min-offer hint (for make-offer) */}
-      {minOfferHint && (
-        <div style={{ fontSize: 12, color: '#555' }}>
-          {minOfferHint}
-        </div>
-      )}
+      {minOfferHint && <div style={{ fontSize: 12, color: '#555' }}>{minOfferHint}</div>}
 
       {/* Meta row */}
       <div
@@ -171,16 +166,13 @@ function DomainCard({ domain }) {
       {/* Actions (stacked for mobile) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
         <button
-          onClick={(e) => {
-            e.stopPropagation?.();
-            open(domain);
-          }}
+          onClick={handleInquire}
           aria-label={`Inquire about ${domain.name}`}
           style={{
             width: '100%',
             background: 'var(--color-accent-primary)',
             color: '#fff',
-            padding: 12, // 44px+ tap target combined with line-height
+            padding: 12,
             borderRadius: 'var(--radius)',
             border: 'none',
             fontWeight: 600,
@@ -197,7 +189,7 @@ function DomainCard({ domain }) {
             gap: 8,
             cursor: 'pointer',
             userSelect: 'none',
-            minHeight: 44, // mobile-friendly
+            minHeight: 44,
           }}
         >
           <input

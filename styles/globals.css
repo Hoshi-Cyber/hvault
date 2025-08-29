@@ -107,7 +107,7 @@ button {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-3); /* ensures consistent page margins site-wide */
 }
 
 .sr-only {
@@ -126,12 +126,29 @@ button {
 /* Header / Nav    */
 /* =============== */
 
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1100; /* above overlays */
+  background: var(--color-background);
+  box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  min-height: var(--site-header-h);
+  display: flex;
+  align-items: center;
+}
+
 .nav {
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-2) 0;
 }
 
-.brand { font-weight: 700; }
+/* Make header row clean: logo left, nav right, good spacing */
+.site-header .container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--site-header-h);
+}
 
 /* desktop defaults */
 .hamburger { display: none; }
@@ -140,11 +157,22 @@ button {
   display: flex;
   gap: var(--space-3);
   list-style: none;
+  margin-left: auto; /* push links to the right on desktop */
 }
 
 .nav-links a {
   text-decoration: none;
   color: var(--color-text-primary);
+  padding: calc(var(--space-1) - 2px) var(--space-1); /* larger hit area */
+  border-radius: 6px;
+}
+.nav-links a.active {
+  color: var(--color-accent-primary);
+  font-weight: 600;
+}
+.nav-links a:focus-visible {
+  outline: 2px solid rgba(0,68,255,.35);
+  outline-offset: 2px;
 }
 
 /* mobile menu */
@@ -153,13 +181,15 @@ button {
     display: inline-flex;
     flex-direction: column;
     gap: 4px;
-    width: 36px;
-    height: 28px;
+    width: 40px;            /* larger tap target */
+    height: 40px;           /* keeps spacing with logo */
+    padding: 6px;
     border: 1px solid var(--color-border);
-    border-radius: 6px;
+    border-radius: 8px;
     background: #fff;
     justify-content: center;
     align-items: center;
+    margin-left: auto;      /* keeps it flush right next to logo row */
   }
   .hamburger span { width: 18px; height: 2px; background: #111; display: block; }
 
@@ -167,7 +197,7 @@ button {
   .nav-links.open {
     display: block;
     position: fixed;
-    top: var(--site-header-h); /* nav height */
+    top: var(--site-header-h); /* sits just under sticky header */
     left: 0; right: 0; bottom: 0;
     background: #fff;
     padding: var(--space-3);
@@ -179,18 +209,6 @@ button {
     padding: 12px 0;
     border-bottom: 1px solid #eee;
   }
-}
-
-/* Sticky header */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 1100; /* above overlays */
-  background: var(--color-background);
-  box-shadow: 0 1px 6px rgba(0,0,0,.04);
-  min-height: var(--site-header-h);
-  display: flex;
-  align-items: center;
 }
 
 /* ======================== */
