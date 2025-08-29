@@ -1,4 +1,4 @@
-/*
+/* 
   Global stylesheet defining design tokens and base styles.
   We lean on CSS custom properties to expose a consistent design system
   across components. Colors, typography, spacing and radii are defined here
@@ -229,7 +229,7 @@ button {
   position: fixed;
   top: 0;
   right: 0;
-  height: 100vh;
+  height: 100dvh; /* better on mobile than 100vh */
   width: min(440px, 100vw);
   background: #fff;
   transform: translateX(100%);
