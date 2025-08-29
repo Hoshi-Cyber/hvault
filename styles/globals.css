@@ -278,7 +278,7 @@ label { display: inline-block; }
 /* Drawer minor utilities   */
 /* ======================== */
 
-/* Status pill (used in InquiryDrawer domain summary) */
+/* Status pill (used in cards + InquiryDrawer) */
 .pill {
   display: inline-block;
   padding: 2px 8px;
@@ -289,6 +289,10 @@ label { display: inline-block; }
   color: #1b3cff;
   border: 1px solid var(--color-border);
 }
+.pill--buy        { background: #0044FF; color: #fff; border-color: transparent; }
+.pill--lease      { background: #FF6600; color: #fff; border-color: transparent; }
+.pill--make-offer { background: #888888; color: #fff; border-color: transparent; }
+.pill--in-use     { background: #555555; color: #fff; border-color: transparent; }
 
 /* Sticky action bar container (InquiryDrawer footer) */
 .drawer-actions {
