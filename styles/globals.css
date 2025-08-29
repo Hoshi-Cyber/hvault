@@ -68,19 +68,16 @@ h1 {
   line-height: 1.3;
   font-weight: 600;
 }
-
 h2 {
   font-size: var(--font-size-h2);
   line-height: 1.4;
   font-weight: 600;
 }
-
 h3 {
   font-size: var(--font-size-h3);
   line-height: 1.4;
   font-weight: 600;
 }
-
 p {
   font-size: var(--font-size-body);
   margin-bottom: var(--space-2);
@@ -90,7 +87,6 @@ a {
   color: var(--color-accent-primary);
   text-decoration: underline;
 }
-
 a:hover,
 a:focus {
   color: var(--color-accent-secondary);
@@ -109,7 +105,6 @@ button {
   margin: 0 auto;
   padding: 0 var(--space-3); /* ensures consistent page margins site-wide */
 }
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -142,23 +137,30 @@ button {
   padding: var(--space-2) 0;
 }
 
-/* Make header row clean: logo left, nav right, good spacing */
-.site-header .container {
+/* header row: logo left, nav right */
+.site-header .container,
+.nav-row {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--site-header-h);
 }
+.nav-row .nav-links,
+.site-header .container .nav-links { margin-left: auto; }
+.nav-row .hamburger,
+.site-header .container .hamburger { margin-left: auto; }
 
 /* desktop defaults */
 .hamburger { display: none; }
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: var(--space-3);
   list-style: none;
   margin-left: auto; /* push links to the right on desktop */
 }
+.nav-links li { display: flex; }
 
 .nav-links a {
   text-decoration: none;
@@ -189,7 +191,7 @@ button {
     background: #fff;
     justify-content: center;
     align-items: center;
-    margin-left: auto;      /* keeps it flush right next to logo row */
+    margin-left: auto;      /* push hamburger to the far right */
   }
   .hamburger span { width: 18px; height: 2px; background: #111; display: block; }
 
@@ -221,11 +223,8 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: var(--space-3);
 }
-
 @media (max-width: 480px) {
-  .grid-cards {
-    grid-template-columns: 1fr;
-  }
+  .grid-cards { grid-template-columns: 1fr; }
 }
 
 /* Drawer utilities (optional: for reuse across components) */
@@ -256,9 +255,7 @@ button {
   display: flex;
   flex-direction: column;
 }
-.drawer.open {
-  transform: translateX(0);
-}
+.drawer.open { transform: translateX(0); }
 
 /* Basic form control polish */
 input[type="text"],
@@ -279,7 +276,6 @@ label { display: inline-block; }
 /* Mobile-only helpers      */
 /* ======================== */
 
-/* Generic helpers */
 .show-mobile { display: none !important; }
 .hide-mobile { display: block !important; }
 
@@ -365,12 +361,8 @@ label { display: inline-block; }
 /* Portfolio toolbar + chips*/
 /* ======================== */
 
-/* Shadow helper toggled by JS (also set inline for safety) */
-.portfolio-toolbar.is-stuck {
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-}
+.portfolio-toolbar.is-stuck { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 
-/* Filter chips */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -382,21 +374,14 @@ label { display: inline-block; }
   font-size: 12px;
   line-height: 1.6;
 }
-.chip--dismissible {
-  cursor: pointer;
-}
+.chip--dismissible { cursor: pointer; }
 
 /* ======================== */
 /* Density toggles          */
 /* ======================== */
 
-/* Apply on <html> via JS: density-comfy (default) / density-compact */
-.density-comfy .grid-cards {
-  gap: var(--space-3);
-}
-.density-compact .grid-cards {
-  gap: var(--space-2);
-}
+.density-comfy .grid-cards { gap: var(--space-3); }
+.density-compact .grid-cards { gap: var(--space-2); }
 .density-compact .portfolio-toolbar .container > * select,
 .density-compact .portfolio-toolbar .container > * button {
   padding-top: 6px !important;
@@ -405,8 +390,5 @@ label { display: inline-block; }
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .backdrop, .drawer,
-  .nav-links.open {
-    transition: none !important;
-  }
+  .backdrop, .drawer, .nav-links.open { transition: none !important; }
 }
