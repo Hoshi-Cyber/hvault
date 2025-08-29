@@ -4,19 +4,14 @@ import GlobalSearch from '../components/GlobalSearch';
 import DomainCard from '../components/DomainCard';
 import domains from '../data/domains.json';
 import categories from '../data/categories.json';
-import styles from '../styles/Home.module.css';
 
 export default function Home() {
-  // Derive curated rows
   const newArrivals = domains.slice(0, 4);
   const shortCom = domains.filter((d) => d.tld === '.com' && d.length <= 7).slice(0, 4);
-
-  // Category spotlights: pick first domain in each category
   const categorySpotlights = categories.slice(0, 3).map((cat) => {
     const domain = domains.find((d) => d.categories.includes(cat.slug));
     return { category: cat, domain };
   });
-
   const geoPicks = domains.filter((d) => d.categories.includes('geo')).slice(0, 4);
 
   return (
@@ -35,39 +30,63 @@ export default function Home() {
         />
       </Head>
 
-      {/* Hero */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <section style={{ padding: 'var(--space-6) 0', background: 'var(--color-neutral)', textAlign: 'center' }}>
         <div className="container">
-          <h1 className={styles.heroTitle}>Unlock Premium Domains for Extraordinary Brands</h1>
-          <p className={styles.heroLead}>
-            Hoshi Vault curates the world’s finest digital real estate — short, memorable names
-            ready to power your next venture.
+          <h1 style={{ marginBottom: 'var(--space-3)' }}>
+            Unlock Premium Domains for Extraordinary Brands
+          </h1>
+          <p style={{ marginBottom: 'var(--space-4)' }}>
+            Hoshi Vault curates the world’s finest digital real estate — short, memorable names ready
+            to power your next venture.
           </p>
-
-          <div className={styles.ctaRow} role="group" aria-label="Primary actions">
-            <Link href="/portfolio" className={`${styles.cta} ${styles.ctaPrimary}`}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+            <Link
+              href="/portfolio"
+              className="btn btn-primary"
+              style={{
+                background: 'var(--color-accent-primary)',
+                color: '#fff',
+                padding: 'var(--space-2) var(--space-3)',
+                borderRadius: 'var(--radius)',
+                textDecoration: 'none'
+              }}
+            >
               Explore Portfolio
             </Link>
-            <Link href="/leasing" className={`${styles.cta} ${styles.ctaGhost}`}>
+            <Link
+              href="/leasing"
+              className="btn btn-outline"
+              style={{
+                border: '1px solid var(--color-accent-primary)',
+                color: 'var(--color-accent-primary)',
+                padding: 'var(--space-2) var(--space-3)',
+                borderRadius: 'var(--radius)',
+                textDecoration: 'none'
+              }}
+            >
               Lease a Domain
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Search */}
-      <section className={styles.section}>
+      <section style={{ padding: 'var(--space-5) 0' }}>
         <div className="container">
-          <h2 className={styles.h2}>Search the Vault</h2>
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>Search the Vault</h2>
           <GlobalSearch />
         </div>
       </section>
 
-      {/* New Arrivals */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <section style={{ padding: 'var(--space-5) 0', background: 'var(--color-neutral)' }}>
         <div className="container">
-          <h2 className={styles.h2}>New Arrivals</h2>
-          <div className="grid-cards">
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>New Arrivals</h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 'var(--space-3)'
+            }}
+          >
             {newArrivals.map((domain) => (
               <DomainCard key={domain.slug} domain={domain} />
             ))}
@@ -75,11 +94,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Short .com */}
-      <section className={styles.section}>
+      <section style={{ padding: 'var(--space-5) 0' }}>
         <div className="container">
-          <h2 className={styles.h2}>Short .com Domains</h2>
-          <div className="grid-cards">
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>Short .com Domains</h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 'var(--space-3)'
+            }}
+          >
             {shortCom.map((domain) => (
               <DomainCard key={domain.slug} domain={domain} />
             ))}
@@ -87,14 +111,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category Spotlights */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <section style={{ padding: 'var(--space-5) 0', background: 'var(--color-neutral)' }}>
         <div className="container">
-          <h2 className={styles.h2}>Category Spotlights</h2>
-          <div className="grid-cards">
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>Category Spotlights</h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 'var(--space-3)'
+            }}
+          >
             {categorySpotlights.map(({ category, domain }) => (
-              <div key={category.slug}>
-                <h3 className={styles.h3}>{category.name}</h3>
+              <div key={category.slug} style={{ display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ marginBottom: 'var(--space-2)' }}>{category.name}</h3>
                 {domain ? <DomainCard domain={domain} /> : <p>No domains in this category yet.</p>}
               </div>
             ))}
@@ -102,11 +131,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Geo Picks */}
-      <section className={styles.section}>
+      <section style={{ padding: 'var(--space-5) 0' }}>
         <div className="container">
-          <h2 className={styles.h2}>Geo Picks</h2>
-          <div className="grid-cards">
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>Geo Picks</h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: 'var(--space-3)'
+            }}
+          >
             {geoPicks.map((domain) => (
               <DomainCard key={domain.slug} domain={domain} />
             ))}
@@ -114,37 +148,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Shortlist form */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <section style={{ padding: 'var(--space-5) 0', background: 'var(--color-neutral)' }}>
         <div className="container" style={{ textAlign: 'center' }}>
-          <h2 className={styles.h2}>60+ Premium Names Ready for Deployment</h2>
-          <p className={styles.leadTight}>
+          <h2 style={{ marginBottom: 'var(--space-3)' }}>60+ Premium Names Ready for Deployment</h2>
+          <p style={{ marginBottom: 'var(--space-3)' }}>
             Selected Deployments: Healthcare, Fintech, AI, Geo markets and more.
           </p>
-
           <form
             onSubmit={(e) => {
               e.preventDefault();
               alert('Shortlist request submitted');
             }}
-            className={styles.form}
-            noValidate
+            style={{
+              display: 'grid',
+              gap: 'var(--space-3)',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}
           >
-            <h3 className={styles.h3}>Request a Domain Shortlist</h3>
-
+            <h3>Request a Domain Shortlist</h3>
             <label>
               <span className="sr-only">Name</span>
-              <input type="text" name="name" placeholder="Your Name" required className={styles.input} />
+              <input
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                required
+                style={{
+                  padding: 'var(--space-2)',
+                  border: `1px solid var(--color-border)`,
+                  borderRadius: 'var(--radius)'
+                }}
+              />
             </label>
-
             <label>
               <span className="sr-only">Email</span>
-              <input type="email" name="email" placeholder="Email Address" required className={styles.input} />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required
+                style={{
+                  padding: 'var(--space-2)',
+                  border: `1px solid var(--color-border)`,
+                  borderRadius: 'var(--radius)'
+                }}
+              />
             </label>
-
             <label>
               <span className="sr-only">Preferred category</span>
-              <select name="category" className={styles.input}>
+              <select
+                name="category"
+                style={{
+                  padding: 'var(--space-2)',
+                  border: `1px solid var(--color-border)`,
+                  borderRadius: 'var(--radius)'
+                }}
+              >
                 <option value="">Preferred Category</option>
                 {categories.map((cat) => (
                   <option key={cat.slug} value={cat.slug}>
@@ -153,25 +213,32 @@ export default function Home() {
                 ))}
               </select>
             </label>
-
-            <button type="submit" className={`${styles.cta} ${styles.ctaPrimary}`}>
+            <button
+              type="submit"
+              style={{
+                background: 'var(--color-accent-primary)',
+                color: '#fff',
+                padding: 'var(--space-2)',
+                borderRadius: 'var(--radius)',
+                border: 'none'
+              }}
+            >
               Submit
             </button>
           </form>
         </div>
       </section>
 
-      {/* About */}
-      <section className={styles.section}>
+      <section style={{ padding: 'var(--space-5) 0' }}>
         <div className="container">
-          <h2 className={styles.h2}>About Hoshi Vault</h2>
+          <h2>About Hoshi Vault</h2>
           <p>
-            Hoshi Vault is a private domain asset company specialising in the acquisition, management
-            and strategic deployment of premium digital real estate. Our mission is to maximise
-            asset value through recurring cashflow, selective high-margin exits and long-term equity
-            growth. Whether leasing or buying, clients trust Hoshi Vault for its authority, discretion
-            and premium inventory. All transactions are conducted via independent escrow for safety
-            and trust.
+            Hoshi Vault is a private domain asset company specialising in the acquisition,
+            management and strategic deployment of premium digital real estate. Our mission is to
+            maximise asset value through recurring cashflow, selective high-margin exits and
+            long-term equity growth. Whether leasing or buying, clients trust Hoshi Vault for its
+            authority, discretion and premium inventory. All transactions are conducted via
+            independent escrow for safety and trust.
           </p>
         </div>
       </section>

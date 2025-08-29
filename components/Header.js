@@ -33,32 +33,24 @@ export default function Header() {
     <header className="site-header">
       <nav aria-label="Main navigation" className="nav">
         <div
-          className="container"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            minHeight: 'var(--site-header-h)',
-          }}
+          className="container nav-row"
+          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
         >
-          {/* Brand (always at left; link to home) */}
-          <Link href="/" aria-label="Hoshi Vault home" style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <Logo size={24} />
-          </Link>
+          {/* Brand (always left) */}
+          <Logo size={24} />
 
-          {/* Spacer pushes nav to the right on desktop */}
-          <div style={{ flex: 1 }} />
-
-          {/* Desktop links (hidden on mobile via CSS) */}
-          <ul id="primary-menu" className={`nav-links ${open ? 'open' : ''}`}>
+          {/* Desktop links (auto-push to the right) */}
+          <ul
+            id="primary-menu"
+            className={`nav-links ${open ? 'open' : ''}`}
+            style={{ marginLeft: 'auto' }}
+          >
             {navItems.map(({ href, label }) => {
               const isActive = router.pathname === href;
               return (
                 <li key={href}>
                   <Link
                     href={href}
-                    onClick={() => setOpen(false)}
-                    aria-current={isActive ? 'page' : undefined}
                     className={isActive ? 'active' : ''}
                     style={{
                       color: isActive
@@ -75,18 +67,14 @@ export default function Header() {
             })}
           </ul>
 
-          {/* Hamburger (visible on mobile only; aligned far right) */}
+          {/* Hamburger (auto-push to far right on mobile) */}
           <button
             className="hamburger"
             aria-label="Toggle menu"
             aria-controls="primary-menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            /** ensure it sits flush right and has comfy hit area */
-            style={{
-              marginLeft: 'auto',
-              padding: '6px', // extra tap target
-            }}
+            style={{ marginLeft: 'auto' }}
           >
             <span></span>
             <span></span>
