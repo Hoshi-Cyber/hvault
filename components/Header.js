@@ -1,6 +1,7 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Logo from './Logo';
 
 export default function Header() {
   const router = useRouter();
@@ -16,10 +17,12 @@ export default function Header() {
     { href: '/contact', label: 'Contact' },
   ];
 
+  // lock body when mobile menu is open
   useEffect(() => {
     document.body.classList.toggle('no-scroll', open);
   }, [open]);
 
+  // close menu on route change
   useEffect(() => {
     const handleRoute = () => setOpen(false);
     router.events.on('routeChangeComplete', handleRoute);
@@ -29,21 +32,18 @@ export default function Header() {
   return (
     <header className="site-header">
       <nav aria-label="Main navigation" className="nav">
-        <div className="container" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <Link href="/" className="brand" style={{ fontWeight:'bold', fontSize:'20px', color:'var(--color-text-primary)', textDecoration:'none' }}>
-            Hoshi&nbsp;Vault
-          </Link>
+        <div
+          className="container"
+          style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+        >
+          {/* Brand (left) */}
+          <Logo size={24} />
 
-          <button
-            className="hamburger"
-            aria-label="Toggle menu"
-            aria-expanded={open}
-            onClick={() => setOpen(v => !v)}
-          >
-            <span></span><span></span><span></span>
-          </button>
+          {/* Spacer to push controls to the far right */}
+          <div style={{ flex: 1 }} />
 
-          <ul className={`nav-links ${open ? 'open' : ''}`}>
+          {/* Desktop links (hidden on mobile via CSS) */}
+          <ul id="primary-menu" className={`nav-links ${open ? 'open' : ''}`}>
             {navItems.map(({ href, label }) => {
               const isActive = router.pathname === href;
               return (
@@ -53,9 +53,11 @@ export default function Header() {
                     onClick={() => setOpen(false)}
                     className={isActive ? 'active' : ''}
                     style={{
-                      color: isActive ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
+                      color: isActive
+                        ? 'var(--color-accent-primary)'
+                        : 'var(--color-text-primary)',
                       textDecoration: 'none',
-                      fontWeight: isActive ? 600 : 400
+                      fontWeight: isActive ? 600 : 400,
                     }}
                   >
                     {label}
@@ -64,6 +66,20 @@ export default function Header() {
               );
             })}
           </ul>
+
+          {/* Hamburger (far right on mobile) */}
+          <button
+            className="hamburger"
+            aria-label="Toggle menu"
+            aria-controls="primary-menu"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            style={{ marginLeft: 'auto' }}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </nav>
     </header>
