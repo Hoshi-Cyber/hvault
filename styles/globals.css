@@ -330,6 +330,45 @@ label { display: inline-block; }
   font-size: 12px;
 }
 
+/* ======================== */
+/* Portfolio toolbar + chips*/
+/* ======================== */
+
+/* Shadow helper toggled by JS (also set inline for safety) */
+.portfolio-toolbar.is-stuck {
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* Filter chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.chip--dismissible {
+  cursor: pointer;
+}
+
+/* ======================== */
+/* Density toggles          */
+/* ======================== */
+
+/* Apply on <html> via JS: density-comfy (default) / density-compact */
+.density-compact .grid-cards {
+  gap: var(--space-2);
+}
+.density-compact .portfolio-toolbar .container > * select,
+.density-compact .portfolio-toolbar .container > * button {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .backdrop, .drawer,

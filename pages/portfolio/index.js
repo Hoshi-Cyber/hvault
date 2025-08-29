@@ -19,6 +19,11 @@ export default function Portfolio() {
     []
   );
   const categoryOptions = categoriesData;
+  const categoryNameBySlug = useMemo(() => {
+    const m = new Map();
+    categoriesData.forEach((c) => m.set(c.slug, c.name));
+    return m;
+  }, []);
 
   // --- responsive flag ---
   const [isMobile, setIsMobile] = useState(false);
@@ -136,8 +141,72 @@ export default function Portfolio() {
     return n;
   }, [filters]);
 
+  // --- chips (active filters) ---
+  const rangeLabel = (label, [a, b], suffix = '') => {
+    if (a != null && b != null) return `${label}: ${a}–${b}${suffix}`;
+    if (a != null) return `${label}: ≥${a}${suffix}`;
+    if (b != null) return `${label}: ≤${b}${suffix}`;
+    return '';
+  };
+
+  const chips = useMemo(() => {
+    const arr = [];
+    // tlds
+    filters.tlds.forEach((tld) => arr.push({ type: 'tld', key: `tld:${tld}`, label: tld, value: tld }));
+    // categories
+    filters.categories.forEach((slug) =>
+      arr.push({ type: 'cat', key: `cat:${slug}`, label: categoryNameBySlug.get(slug) || slug, value: slug })
+    );
+    // status
+    if (filters.status) arr.push({ type: 'status', key: `status:${filters.status}`, label: `Status: ${filters.status}`, value: filters.status });
+    // ranges
+    if (filters.length[0] != null || filters.length[1] != null) {
+      arr.push({ type: 'length', key: 'len', label: rangeLabel('Len', filters.length, 'ch') });
+    }
+    if (filters.price[0] != null || filters.price[1] != null) {
+      arr.push({ type: 'price', key: 'price', label: rangeLabel('Price', filters.price, '') });
+    }
+    if (filters.age[0] != null || filters.age[1] != null) {
+      arr.push({ type: 'age', key: 'age', label: rangeLabel('Age', filters.age, 'y') });
+    }
+    return arr;
+  }, [filters, categoryNameBySlug]);
+
+  const removeChip = (chip) => {
+    if (chip.type === 'tld') {
+      toggleTld(chip.value);
+    } else if (chip.type === 'cat') {
+      toggleCategory(chip.value);
+    } else if (chip.type === 'status') {
+      handleStatusChange('');
+    } else if (chip.type === 'length') {
+      handleLengthChange(null, null);
+    } else if (chip.type === 'price') {
+      handlePriceChange(null, null);
+    } else if (chip.type === 'age') {
+      handleAgeChange(null, null);
+    }
+  };
+
   // --- mobile drawer trigger state (body lock handled inside FilterDrawer) ---
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // --- density toggle (applies a class to <html>) ---
+  const [density, setDensity] = useState('comfy'); // 'comfy' | 'compact'
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('density-compact', density === 'compact');
+    root.classList.toggle('density-comfy', density === 'comfy');
+  }, [density]);
+
+  // --- sticky toolbar shadow state ---
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setStuck(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // shared filters UI (rendered in desktop sidebar; same controls as drawer)
   const FiltersUI = (
@@ -251,48 +320,141 @@ export default function Portfolio() {
         <meta name="description" content="Discover short .com, geo, and brandable premium domains." />
       </Head>
 
-      {/* MOBILE toolbar */}
-      {isMobile && (
-        <div
-          style={{
-            position: 'sticky',
-            top: 'calc(var(--site-header-h, 56px))',
-            zIndex: 10,
-            background: '#fff',
-            borderBottom: '1px solid var(--color-border)',
-          }}
-        >
-          <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+      {/* Sticky toolbar (mobile + desktop) */}
+      <div
+        className={`portfolio-toolbar ${stuck ? 'is-stuck' : ''}`}
+        style={{
+          position: 'sticky',
+          top: 'var(--site-header-h, 56px)',
+          zIndex: 10,
+          background: '#fff',
+          borderBottom: '1px solid var(--color-border)',
+          boxShadow: stuck ? '0 2px 8px rgba(0,0,0,.06)' : 'none',
+        }}
+      >
+        <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+          {isMobile ? (
+            <>
+              <button
+                onClick={() => setDrawerOpen(true)}
+                aria-haspopup="dialog"
+                style={{
+                  border: `1px solid var(--color-border)`,
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  background: '#fff',
+                  fontWeight: 600,
+                }}
+              >
+                Filters{activeCount ? ` (${activeCount})` : ''}
+              </button>
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label htmlFor="sort-m" style={{ marginRight: 6 }}>Sort:</label>
+                <select
+                  id="sort-m"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  style={{ padding: 8, borderRadius: 8, border: '1px solid var(--color-border)' }}
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="shortest">Shortest</option>
+                  <option value="alphabetical">Alphabetical</option>
+                  <option value="price">Price</option>
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 style={{ margin: 0 }}>Domains ({sorted.length})</h2>
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+                {/* Density toggle */}
+                <div role="group" aria-label="Density" style={{ display: 'inline-flex', border: '1px solid var(--color-border)', borderRadius: 8, overflow: 'hidden' }}>
+                  <button
+                    onClick={() => setDensity('comfy')}
+                    aria-pressed={density === 'comfy'}
+                    style={{
+                      padding: '6px 10px',
+                      background: density === 'comfy' ? 'var(--color-neutral)' : '#fff',
+                      border: 'none',
+                    }}
+                  >
+                    Comfortable
+                  </button>
+                  <button
+                    onClick={() => setDensity('compact')}
+                    aria-pressed={density === 'compact'}
+                    style={{
+                      padding: '6px 10px',
+                      background: density === 'compact' ? 'var(--color-neutral)' : '#fff',
+                      border: 'none',
+                      borderLeft: '1px solid var(--color-border)',
+                    }}
+                  >
+                    Compact
+                  </button>
+                </div>
+
+                {/* Sort */}
+                <div>
+                  <label htmlFor="sort" style={{ marginRight: 6 }}>Sort:</label>
+                  <select
+                    id="sort"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    style={{ padding: 6, borderRadius: 8, border: `1px solid var(--color-border)` }}
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="shortest">Shortest</option>
+                    <option value="alphabetical">Alphabetical</option>
+                    <option value="price">Price</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Active chips row */}
+        {chips.length > 0 && (
+          <div className="container" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '8px 0 12px' }}>
+            {chips.map((chip) => (
+              <button
+                key={chip.key}
+                onClick={() => removeChip(chip)}
+                className="chip chip--dismissible"
+                aria-label={`Remove ${chip.label}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 999,
+                  padding: '4px 10px',
+                  background: '#fff',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                <span>{chip.label}</span>
+                <span aria-hidden="true" style={{ fontWeight: 700, lineHeight: 1 }}>×</span>
+              </button>
+            ))}
             <button
-              onClick={() => setDrawerOpen(true)}
-              aria-haspopup="dialog"
+              onClick={clearAll}
               style={{
-                border: `1px solid var(--color-border)`,
-                borderRadius: 8,
-                padding: '8px 12px',
-                background: '#fff',
-                fontWeight: 600,
+                marginLeft: 'auto',
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--color-accent-primary)',
+                cursor: 'pointer',
+                fontSize: 12,
               }}
             >
-              Filters{activeCount ? ` (${activeCount})` : ''}
+              Clear all
             </button>
-            <div style={{ marginLeft: 'auto' }}>
-              <label htmlFor="sort-m" style={{ marginRight: 6 }}>Sort:</label>
-              <select
-                id="sort-m"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                style={{ padding: 8, borderRadius: 8, border: '1px solid var(--color-border)' }}
-              >
-                <option value="relevance">Relevance</option>
-                <option value="shortest">Shortest</option>
-                <option value="alphabetical">Alphabetical</option>
-                <option value="price">Price</option>
-              </select>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <div
         className="container"
@@ -333,26 +495,6 @@ export default function Portfolio() {
 
         {/* RESULTS */}
         <section style={{ flex: '1 1 auto', paddingLeft: isMobile ? 0 : 'var(--space-3)' }}>
-          {!isMobile && (
-            <div style={{ marginBottom: 'var(--space-3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0 }}>Domains ({sorted.length})</h2>
-              <div>
-                <label htmlFor="sort">Sort:</label>{' '}
-                <select
-                  id="sort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  style={{ padding: 6, borderRadius: 8, border: `1px solid var(--color-border)` }}
-                >
-                  <option value="relevance">Relevance</option>
-                  <option value="shortest">Shortest</option>
-                  <option value="alphabetical">Alphabetical</option>
-                  <option value="price">Price</option>
-                </select>
-              </div>
-            </div>
-          )}
-
           {sorted.length === 0 ? (
             <div style={{ padding: 'var(--space-4)', textAlign: 'center' }}>
               <p>No domains match your filters.</p>
@@ -379,7 +521,7 @@ export default function Portfolio() {
         </section>
       </div>
 
-      {/* MOBILE Filter Drawer (external component) */}
+      {/* MOBILE Filter Drawer */}
       {isMobile && (
         <FilterDrawer
           open={drawerOpen}
