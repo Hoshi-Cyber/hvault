@@ -330,6 +330,19 @@ label { display: inline-block; }
   font-size: 12px;
 }
 
+/* ---- Card link overlay helper (for wide tappable area) ---- */
+.card-link { position: relative; }
+.card-link__overlay {
+  position: absolute;
+  inset: var(--space-3);
+  border-radius: var(--radius);
+  z-index: 1; /* controls should have higher z-index if needed */
+}
+.card-link__overlay:focus-visible {
+  outline: 3px solid rgba(0,68,255,.35);
+  outline-offset: 2px;
+}
+
 /* ======================== */
 /* Portfolio toolbar + chips*/
 /* ======================== */
@@ -360,6 +373,9 @@ label { display: inline-block; }
 /* ======================== */
 
 /* Apply on <html> via JS: density-comfy (default) / density-compact */
+.density-comfy .grid-cards {
+  gap: var(--space-3);
+}
 .density-compact .grid-cards {
   gap: var(--space-2);
 }
